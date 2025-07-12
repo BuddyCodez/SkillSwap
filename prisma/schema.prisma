@@ -29,8 +29,6 @@ datasource db {
 //   @@map("user")
 // }
 
-
-
 model Session {
   id        String   @id
   expiresAt DateTime
@@ -77,85 +75,89 @@ model Verification {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  name          String
-  email         String         @unique
-  emailVerified Boolean        @default(false)
-  image         String?
-  role          Role           @default(NORMAL)
-  bio           String?
-  location      String?
-  profilePublic Boolean        @default(true)
-  skillsOffered Skill[]        @relation("UserOfferedSkills")
-  skillsWanted  Skill[]        @relation("UserWantedSkills")
-  availability  Availability[]
-  sentSwapRequests SwapRequest[] @relation("SentSwapRequests")
-  receivedSwapRequests SwapRequest[] @relation("ReceivedSwapRequests")
-  givenRatings  Rating[]       @relation("RatingGivers")
-  receivedRatings Rating[]     @relation("RatingReceivers")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id                   String         @id @default(uuid())
+  name                 String
+  email                String         @unique
+  emailVerified        Boolean        @default(false)
+  image                String?
+  role                 Role           @default(NORMAL)
+  bio                  String?
+  location             String?
+  profilePublic        Boolean        @default(true)
+  skillsOffered        Skill[]        @relation("UserOfferedSkills")
+  skillsWanted         Skill[]        @relation("UserWantedSkills")
+  availability         Availability[]
+  sentSwapRequests     SwapRequest[]  @relation("SentSwapRequests")
+  receivedSwapRequests SwapRequest[]  @relation("ReceivedSwapRequests")
+  givenRatings         Rating[]       @relation("RatingGivers")
+  receivedRatings      Rating[]       @relation("RatingReceivers")
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  sessions             Session[]
+  accounts             Account[]
 
   @@map("user")
 }
+
 model Availability {
-  id       String   @id @default(uuid())
-  day      String   // e.g., "Monday", "Weekend"
-  time     String   // e.g., "Evenings", "Afternoons"
-  userId   String
-  user     User     @relation(fields: [userId], references: [id])
+  id     String @id @default(uuid())
+  day    String // e.g., "Monday", "Weekend"
+  time   String // e.g., "Evenings", "Afternoons"
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 
   @@map("availabilities")
 }
 
 model Skill {
-  id          String      @id @default(uuid())
-  name        String
-  description String?
-  category    String
-  userId      String
-  user        User        @relation("UserOfferedSkills", fields: [userId], references: [id])
+  id             String        @id @default(uuid())
+  name           String
+  description    String?
+  category       String
+  userId         String
+  user           User          @relation("UserOfferedSkills", fields: [userId], references: [id])
   offeredInSwaps SwapRequest[] @relation("OfferedSkills")
-  wantedInSwaps SwapRequest[] @relation("WantedSkills")
-  
+  wantedInSwaps  SwapRequest[] @relation("WantedSkills")
+  User           User[]        @relation("UserWantedSkills")
+
   @@map("skills")
-  User User[] @relation("UserWantedSkills")
 }
 
 model SwapRequest {
-  id          String   @id @default(uuid())
-  fromUserId  String
-  fromUser    User     @relation("SentSwapRequests", fields: [fromUserId], references: [id])
-  toUserId    String
-  toUser      User     @relation("ReceivedSwapRequests", fields: [toUserId], references: [id])
+  id             String        @id @default(uuid())
+  fromUserId     String
+  fromUser       User          @relation("SentSwapRequests", fields: [fromUserId], references: [id])
+  toUserId       String
+  toUser         User          @relation("ReceivedSwapRequests", fields: [toUserId], references: [id])
   skillOfferedId String
-  skillOffered Skill   @relation("OfferedSkills", fields: [skillOfferedId], references: [id])
+  skillOffered   Skill         @relation("OfferedSkills", fields: [skillOfferedId], references: [id])
   skillWantedId  String
-  skillWanted  Skill   @relation("WantedSkills", fields: [skillWantedId], references: [id])
-  status      RequestStatus @default(PENDING)
-  ratings     Rating[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  skillWanted    Skill         @relation("WantedSkills", fields: [skillWantedId], references: [id])
+  status         RequestStatus @default(PENDING)
+  message        String?
+  ratings        Rating[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@map("swap_requests")
 }
 
 model Rating {
-  id          String   @id @default(uuid())
-  rating      Int      
-  comment     String?
-  fromUserId  String
-  fromUser    User     @relation("RatingGivers", fields: [fromUserId], references: [id])
-  toUserId    String
-  toUser      User     @relation("RatingReceivers", fields: [toUserId], references: [id])
-  swapId      String
-  swap        SwapRequest @relation(fields: [swapId], references: [id])
-  createdAt   DateTime @default(now())
+  id         String      @id @default(uuid())
+  rating     Int
+  comment    String?
+  fromUserId String
+  fromUser   User        @relation("RatingGivers", fields: [fromUserId], references: [id])
+  toUserId   String
+  toUser     User        @relation("RatingReceivers", fields: [toUserId], references: [id])
+  swapId     String
+  swap       SwapRequest @relation(fields: [swapId], references: [id])
+  createdAt  DateTime    @default(now())
 
+  @@unique([fromUserId, swapId])
   @@map("ratings")
 }
+
 enum Role {
   NORMAL
   ADMIN
