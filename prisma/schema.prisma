@@ -91,6 +91,8 @@ model User {
   receivedSwapRequests SwapRequest[]  @relation("ReceivedSwapRequests")
   givenRatings         Rating[]       @relation("RatingGivers")
   receivedRatings      Rating[]       @relation("RatingReceivers")
+  conversations        Conversation[] @relation("ConversationParticipants")
+  sentMessages         Message[]      @relation("MessageSender")
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
   sessions             Session[]
@@ -124,20 +126,21 @@ model Skill {
 }
 
 model SwapRequest {
-  id             String        @id @default(uuid())
+  id             String         @id @default(uuid())
   fromUserId     String
-  fromUser       User          @relation("SentSwapRequests", fields: [fromUserId], references: [id])
+  fromUser       User           @relation("SentSwapRequests", fields: [fromUserId], references: [id])
   toUserId       String
-  toUser         User          @relation("ReceivedSwapRequests", fields: [toUserId], references: [id])
+  toUser         User           @relation("ReceivedSwapRequests", fields: [toUserId], references: [id])
   skillOfferedId String
-  skillOffered   Skill         @relation("OfferedSkills", fields: [skillOfferedId], references: [id])
+  skillOffered   Skill          @relation("OfferedSkills", fields: [skillOfferedId], references: [id])
   skillWantedId  String
-  skillWanted    Skill         @relation("WantedSkills", fields: [skillWantedId], references: [id])
-  status         RequestStatus @default(PENDING)
+  skillWanted    Skill          @relation("WantedSkills", fields: [skillWantedId], references: [id])
+  status         RequestStatus  @default(PENDING)
   message        String?
   ratings        Rating[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  conversations  Conversation[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@map("swap_requests")
 }
@@ -158,6 +161,33 @@ model Rating {
   @@map("ratings")
 }
 
+model Conversation {
+  id            String       @id @default(uuid())
+  participants  User[]       @relation("ConversationParticipants")
+  messages      Message[]
+  swapRequestId String?
+  swapRequest   SwapRequest? @relation(fields: [swapRequestId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  content        String
+  type           MessageType  @default(TEXT)
+  senderId       String
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("messages")
+}
+
 enum Role {
   NORMAL
   ADMIN
@@ -169,4 +199,9 @@ enum RequestStatus {
   REJECTED
   CANCELLED
   COMPLETED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
 }

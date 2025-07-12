@@ -498,4 +498,68 @@ export const userRouter = createTRPCRouter({
 
             return { success: true }
         }),
+    updateRating: protectedProcedure
+        .input(
+            z.object({
+                ratingId: z.string(),
+                rating: z.number().min(1).max(5),
+                feedback: z.string().optional(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            // Verify the user is the one who gave this rating
+            const existingRating = await ctx.prisma.rating.findUnique({
+                where: { id: input.ratingId },
+            })
+
+            if (!existingRating || existingRating.fromUserId !== ctx.user.id) {
+                throw new Error("Unauthorized to update this rating")
+            }
+
+            return await ctx.prisma.rating.update({
+                where: { id: input.ratingId },
+                data: {
+                    rating: input.rating,
+                    comment: input.feedback,
+                },
+            })
+        }),
+
+    getGivenReviews: protectedProcedure.query(async ({ ctx }) => {
+        return await ctx.prisma.rating.findMany({
+            where: { fromUserId: ctx.user.id },
+            include: {
+                toUser: {
+                    select: { id: true, name: true, image: true },
+                },
+                swap: {
+                    select: {
+                        id: true,
+                        skillOffered: { select: { name: true } },
+                        skillWanted: { select: { name: true } },
+                    },
+                },
+            },
+            orderBy: { createdAt: "desc" },
+        })
+    }),
+
+    getReceivedReviews: protectedProcedure.query(async ({ ctx }) => {
+        return await ctx.prisma.rating.findMany({
+            where: { toUserId: ctx.user.id },
+            include: {
+                fromUser: {
+                    select: { id: true, name: true, image: true },
+                },
+                swap: {
+                    select: {
+                        id: true,
+                        skillOffered: { select: { name: true } },
+                        skillWanted: { select: { name: true } },
+                    },
+                },
+            },
+            orderBy: { createdAt: "desc" },
+        })
+    }),
 })

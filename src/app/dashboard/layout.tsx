@@ -1,6 +1,7 @@
 import type React from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Breadcrumb } from "@/components/dashboard/breadcrum"
+import { AnnouncementBanner } from "@/components/ui/announcement-banner"
 
 export default function DashboardLayout({
     children,
@@ -16,6 +17,7 @@ export default function DashboardLayout({
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl animate-pulse delay-2000" />
             </div> */}
 
+            <AnnouncementBanner />
             <Sidebar />
 
             <div className="flex-1 flex flex-col overflow-hidden md:ml-16 lg:ml-64">

@@ -2,7 +2,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Home, User, ArrowLeftRight, Star, Calendar, Settings, Menu, LogOut } from "lucide-react"
+import { Home, User, ArrowLeftRight, Star, Calendar, Settings, Menu, LogOut, MessageSquare } from "lucide-react"
 import { useSession, signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet"
@@ -15,7 +15,7 @@ const navItems = [
   { name: "Profile", href: "/dashboard/profile", icon: User },
   { name: "Swaps", href: "/dashboard/swaps", icon: ArrowLeftRight },
   { name: "Reviews", href: "/dashboard/reviews", icon: Star },
-  { name: "Schedule", href: "/dashboard/schedule", icon: Calendar },
+  { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
