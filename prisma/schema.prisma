@@ -14,18 +14,157 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+// model User {
+//   id            String    @id
+//   name          String
+//   email         String
+//   emailVerified Boolean
+//   image         String?
+//   createdAt     DateTime
+//   updatedAt     DateTime
+//   sessions      Session[]
+//   accounts      Account[]
+
+//   @@unique([email])
+//   @@map("user")
+// }
+
+
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  authorId  Int
-  author    User    @relation(fields: [authorId], references: [id])
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  emailVerified Boolean        @default(false)
+  image         String?
+  role          Role           @default(NORMAL)
+  bio           String?
+  location      String?
+  profilePublic Boolean        @default(true)
+  skillsOffered Skill[]        @relation("UserOfferedSkills")
+  skillsWanted  Skill[]        @relation("UserWantedSkills")
+  availability  Availability[]
+  sentSwapRequests SwapRequest[] @relation("SentSwapRequests")
+  receivedSwapRequests SwapRequest[] @relation("ReceivedSwapRequests")
+  givenRatings  Rating[]       @relation("RatingGivers")
+  receivedRatings Rating[]     @relation("RatingReceivers")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+model Availability {
+  id       String   @id @default(uuid())
+  day      String   // e.g., "Monday", "Weekend"
+  time     String   // e.g., "Evenings", "Afternoons"
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@map("availabilities")
+}
+
+model Skill {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  category    String
+  userId      String
+  user        User        @relation("UserOfferedSkills", fields: [userId], references: [id])
+  offeredInSwaps SwapRequest[] @relation("OfferedSkills")
+  wantedInSwaps SwapRequest[] @relation("WantedSkills")
+  
+  @@map("skills")
+  User User[] @relation("UserWantedSkills")
+}
+
+model SwapRequest {
+  id          String   @id @default(uuid())
+  fromUserId  String
+  fromUser    User     @relation("SentSwapRequests", fields: [fromUserId], references: [id])
+  toUserId    String
+  toUser      User     @relation("ReceivedSwapRequests", fields: [toUserId], references: [id])
+  skillOfferedId String
+  skillOffered Skill   @relation("OfferedSkills", fields: [skillOfferedId], references: [id])
+  skillWantedId  String
+  skillWanted  Skill   @relation("WantedSkills", fields: [skillWantedId], references: [id])
+  status      RequestStatus @default(PENDING)
+  ratings     Rating[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("swap_requests")
+}
+
+model Rating {
+  id          String   @id @default(uuid())
+  rating      Int      
+  comment     String?
+  fromUserId  String
+  fromUser    User     @relation("RatingGivers", fields: [fromUserId], references: [id])
+  toUserId    String
+  toUser      User     @relation("RatingReceivers", fields: [toUserId], references: [id])
+  swapId      String
+  swap        SwapRequest @relation(fields: [swapId], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@map("ratings")
+}
+enum Role {
+  NORMAL
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  COMPLETED
 }
