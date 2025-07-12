@@ -41,3 +41,12 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+prisma/schema.prisma
+
+# Windows reserved filenames
+nul
+con
+prn
+aux
+com[1-9]
+lpt[1-9]
