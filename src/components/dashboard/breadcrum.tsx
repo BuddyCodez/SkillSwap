@@ -20,18 +20,18 @@ export function Breadcrumb() {
     })
 
     return (
-        <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-            <Link href="/" className="flex items-center hover:text-gray-900 transition-colors">
+        <nav className="flex items-center space-x-2 text-sm mb-6 p-3 bg-black/20 backdrop-blur-xl rounded-lg border border-purple-500/20">
+            <Link href="/" className="flex items-center hover:text-purple-300 transition-colors text-purple-100">
                 <Home className="w-4 h-4" />
             </Link>
 
             {breadcrumbs.map((breadcrumb, index) => (
                 <div key={breadcrumb.href} className="flex items-center space-x-2">
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 text-purple-400" />
                     {breadcrumb.isLast ? (
-                        <span className="font-medium text-gray-900">{breadcrumb.label}</span>
+                        <span className="font-medium text-white">{breadcrumb.label}</span>
                     ) : (
-                        <Link href={breadcrumb.href} className="hover:text-gray-900 transition-colors">
+                        <Link href={breadcrumb.href} className="hover:text-purple-300 transition-colors text-purple-100">
                             {breadcrumb.label}
                         </Link>
                     )}
