@@ -153,4 +153,105 @@ export const userRouter = createTRPCRouter({
                 },
             })
         }),
+
+    updateProfile: protectedProcedure
+        .input(
+            z.object({
+                name: z.string().min(1).optional(),
+                bio: z.string().optional(),
+                location: z.string().optional(),
+                profilePublic: z.boolean().optional(),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            return await ctx.prisma.user.update({
+                where: { id: ctx.user.id },
+                data: input,
+            })
+        }),
+
+    addSkill: protectedProcedure
+        .input(
+            z.object({
+                name: z.string().min(1),
+                description: z.string().optional(),
+                category: z.string(),
+                type: z.enum(["offered", "wanted"]),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const skill = await ctx.prisma.skill.create({
+                data: {
+                    name: input.name,
+                    description: input.description,
+                    category: input.category,
+                    userId: ctx.user.id,
+                },
+            })
+
+            if (input.type === "wanted") {
+                await ctx.prisma.user.update({
+                    where: { id: ctx.user.id },
+                    data: {
+                        skillsWanted: {
+                            connect: { id: skill.id },
+                        },
+                    },
+                })
+            }
+
+            return skill
+        }),
+
+    removeSkill: protectedProcedure
+        .input(
+            z.object({
+                skillId: z.string(),
+                type: z.enum(["offered", "wanted"]),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            if (input.type === "wanted") {
+                await ctx.prisma.user.update({
+                    where: { id: ctx.user.id },
+                    data: {
+                        skillsWanted: {
+                            disconnect: { id: input.skillId },
+                        },
+                    },
+                })
+            }
+
+            return await ctx.prisma.skill.delete({
+                where: { id: input.skillId },
+            })
+        }),
+
+    updateAvailability: protectedProcedure
+        .input(
+            z.object({
+                availability: z.array(
+                    z.object({
+                        day: z.string(),
+                        time: z.string(),
+                    }),
+                ),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            // Delete existing availability
+            await ctx.prisma.availability.deleteMany({
+                where: { userId: ctx.user.id },
+            })
+
+            // Create new availability
+            await ctx.prisma.availability.createMany({
+                data: input.availability.map((avail) => ({
+                    ...avail,
+                    userId: ctx.user.id,
+                })),
+            })
+
+            return { success: true }
+        }),
 })
