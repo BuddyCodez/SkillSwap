@@ -16,7 +16,6 @@ const navItems = [
   { name: "Swaps", href: "/dashboard/swaps", icon: ArrowLeftRight },
   { name: "Reviews", href: "/dashboard/reviews", icon: Star },
   { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]
 
 export function Sidebar() {
