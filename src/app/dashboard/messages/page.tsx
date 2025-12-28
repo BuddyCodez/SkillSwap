@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { motion } from "framer-motion"
 import { useQuery } from "@tanstack/react-query"
 import { MessageCircle, Search } from "lucide-react"
@@ -15,7 +15,7 @@ import { EmptyState } from "@/components/messages/empty-state"
 import { useTRPC } from "@/trpc/client"
 import { ConversationList } from "@/components/messages/convo-list"
 
-export default function MessagesPage() {
+function MessagesPageContent() {
     const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
 
@@ -139,5 +139,13 @@ export default function MessagesPage() {
                 </CardContent>
             </Card>
         </div>
+    )
+}
+
+export default function MessagesPage() {
+    return (
+        <Suspense fallback={<div className="h-[calc(100vh-8rem)] flex items-center justify-center"><p className="text-purple-300">Loading messages...</p></div>}>
+            <MessagesPageContent />
+        </Suspense>
     )
 }

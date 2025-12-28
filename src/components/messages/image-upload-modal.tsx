@@ -21,11 +21,7 @@ export function ImageUploadModal({ onClose, onUpload }: ImageUploadModalProps) {
     const [isUploading, setIsUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
-
-        // Validate file type
+    const handleFileSelect = (file: File) => {
         if (!file.type.startsWith("image/")) {
             toast.error("Please select an image file")
             return
@@ -69,16 +65,15 @@ export function ImageUploadModal({ onClose, onUpload }: ImageUploadModalProps) {
         e.preventDefault()
     }
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault()
-        const file = e.dataTransfer.files[0]
-        if (file && file.type.startsWith("image/")) {
-            const event = {
-                target: { files: [file] },
-            } as React.ChangeEvent<HTMLInputElement>
-            handleFileSelect(event)
-        }
+
+        const file = e.dataTransfer.files?.[0]
+        if (!file) return
+
+        handleFileSelect(file)
     }
+
 
     return (
         <Dialog open={true} onOpenChange={onClose}>
@@ -104,7 +99,17 @@ export function ImageUploadModal({ onClose, onUpload }: ImageUploadModalProps) {
                             <p className="text-white mb-2">Click to upload or drag and drop</p>
                             <p className="text-purple-300 text-sm">PNG, JPG, GIF up to 5MB</p>
 
-                            <Input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                            <Input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) handleFileSelect(file)
+                                }}
+                            />
+
                         </motion.div>
                     ) : (
                         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
