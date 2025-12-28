@@ -26,13 +26,46 @@ export function PrivacySection({ user }: PrivacySectionProps) {
 
     const updateProfileMutation = useMutation({
         ...updateProfileMutationOptions,
-        onSuccess: () => {
+        onMutate: async (newSettings) => {
+            // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
             const dashboardQueryKey = trpc.user.getDashboardData.queryKey()
-            queryClient.invalidateQueries({ queryKey: dashboardQueryKey })
-            toast.success("Privacy settings updated!")
+            await queryClient.cancelQueries({ queryKey: dashboardQueryKey })
+
+            // Snapshot the previous value
+            const previousDashboardData = queryClient.getQueryData(dashboardQueryKey)
+
+            // Optimistically update to the new value
+            if (newSettings && newSettings.profilePublic !== undefined) {
+                queryClient.setQueryData(dashboardQueryKey, (old: any) => {
+                    if (!old) return old
+                    return {
+                        ...old,
+                        user: {
+                            ...old.user,
+                            profilePublic: newSettings.profilePublic,
+                        },
+                    }
+                })
+            }
+
+            // Return a context object with the snapshotted value
+            return { previousDashboardData, dashboardQueryKey }
         },
-        onError: () => {
+        onError: (err, newSettings, context) => {
+            // If the mutation fails, use the context returned from onMutate to roll back
+            if (context?.previousDashboardData) {
+                queryClient.setQueryData(context.dashboardQueryKey, context.previousDashboardData)
+            }
             toast.error("Failed to update privacy settings")
+        },
+        onSettled: (data, error, variables, context) => {
+            // Always refetch after error or success to ensure cache is in sync
+            if (context?.dashboardQueryKey) {
+                queryClient.invalidateQueries({ queryKey: context.dashboardQueryKey })
+            }
+        },
+        onSuccess: () => {
+            toast.success("Privacy settings updated!")
         },
     })
 

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ArrowRight, Star, Users, MessageCircle, Zap, Code, Palette, Camera, Music, Languages, Sparkles, Heart, Trophy, Menu } from "lucide-react"
+import { ArrowRight, Star, Users, MessageCircle, Zap, Code, Palette, Camera, Music, Languages, Sparkles, Heart, Trophy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -11,14 +11,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnnouncementBanner } from "@/components/ui/announcement-banner"
 
 // Mock data for live interactions
-const mockSkills = [
-  { name: "React", category: "Programming", icon: Code, color: "bg-blue-500" },
-  { name: "UI/UX Design", category: "Design", icon: Palette, color: "bg-purple-500" },
-  { name: "Photography", category: "Creative", icon: Camera, color: "bg-green-500" },
-  { name: "Guitar", category: "Music", icon: Music, color: "bg-red-500" },
-  { name: "Spanish", category: "Language", icon: Languages, color: "bg-yellow-500" },
-]
-
 const mockUsers = [
   { name: "Sarah", skill: "React", wants: "UI/UX Design", avatar: "👩‍💻", rating: 4.9 },
   { name: "Alex", skill: "Photography", wants: "Guitar", avatar: "📸", rating: 4.7 },
@@ -53,7 +45,6 @@ const features = [
 ]
 
 export default function LandingPage() {
-  const [currentSkillIndex, setCurrentSkillIndex] = useState(0)
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
@@ -142,13 +133,13 @@ export default function LandingPage() {
                 Build a community where everyone teaches and everyone learns.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                <Button size="lg" className="group bg-purple-600 hover:bg-purple-700 text-white border-0" asChild>
+                <Button size="lg" className="group bg-purple-600 hover:bg-purple-700 text-white border-0 hover:scale-105 active:scale-95 transition-all duration-200" asChild>
                   <Link href="/auth/signup">
                     Start Skill Swapping
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
-                <Button size="lg" className="bg-purple-500 hover:bg-purple-600 text-white border-0" asChild>
+                <Button size="lg" className="bg-purple-500 hover:bg-purple-600 text-white border-0 hover:scale-105 active:scale-95 transition-all duration-200" asChild>
                   <Link href="#demo">
                     See How It Works
                     <Zap className="ml-2 h-4 w-4" />
@@ -220,9 +211,11 @@ export default function LandingPage() {
                         ))}
                         <span className="text-sm text-gray-400 ml-1">(4.9)</span>
                       </div>
-                      <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white border-0">
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Connect
+                      <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white border-0 hover:scale-105 active:scale-95 transition-all duration-200" asChild>
+                        <Link href="/auth/signup">
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Connect
+                        </Link>
                       </Button>
                     </div>
                   </div>
@@ -322,9 +315,11 @@ export default function LandingPage() {
                               Wants: {user.wants}
                             </Badge>
                           </div>
-                          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0" size="sm">
-                            <MessageCircle className="h-4 w-4 mr-2" />
-                            Connect
+                          <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0 hover:scale-105 active:scale-95 transition-all duration-200" size="sm" asChild>
+                            <Link href="/auth/signup">
+                              <MessageCircle className="h-4 w-4 mr-2" />
+                              Connect
+                            </Link>
                           </Button>
                         </CardContent>
                       </Card>
@@ -342,12 +337,12 @@ export default function LandingPage() {
                           S
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm text-white">Hey! I saw you're looking to learn React. I'd love to help you get started!</p>
+                          <p className="text-sm text-white">Hey! I saw you&apos;re looking to learn React. I&apos;d love to help you get started!</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 p-3 bg-pink-900/30 backdrop-blur-sm rounded-lg ml-8 border border-pink-500/20">
                         <div className="flex-1">
-                          <p className="text-sm text-white">That's amazing! I can teach you UI/UX design in return. When would be a good time to start?</p>
+                          <p className="text-sm text-white">That&apos;s amazing! I can teach you UI/UX design in return. When would be a good time to start?</p>
                         </div>
                         <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center text-white font-semibold text-sm">
                           A
@@ -375,7 +370,7 @@ export default function LandingPage() {
                     <div>
                       <h3 className="text-2xl font-bold text-white">Swap Completed!</h3>
                       <p className="text-gray-300 mt-2">
-                        Congratulations! You've successfully completed your skill exchange.
+                        Congratulations! You&apos;ve successfully completed your skill exchange.
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 p-4 bg-purple-900/20 backdrop-blur-sm rounded-lg border border-purple-500/20">
@@ -390,9 +385,11 @@ export default function LandingPage() {
                         <p className="text-sm text-gray-300">UI/UX Design</p>
                       </div>
                     </div>
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0">
-                      <Star className="h-4 w-4 mr-2" />
-                      Rate Your Experience
+                    <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white border-0 hover:scale-105 active:scale-95 transition-all duration-200" asChild>
+                      <Link href="/auth/signup">
+                        <Star className="h-4 w-4 mr-2" />
+                        Rate Your Experience
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
@@ -472,13 +469,13 @@ export default function LandingPage() {
                 Join thousands of learners who are already growing their skills through meaningful exchanges
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                <Button size="lg" className="bg-white text-purple-700 hover:bg-gray-100 border-0" asChild>
+                <Button size="lg" className="bg-white text-purple-700 hover:bg-gray-100 border-0 hover:scale-105 active:scale-95 transition-all duration-200" asChild>
                   <Link href="/auth/signup">
                     <Sparkles className="mr-2 h-5 w-5" />
                     Start Skill Swapping
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm" asChild>
+                <Button size="lg" variant="outline" className="border-white/30 text-black hover:bg-white/90 backdrop-blur-sm hover:scale-105 active:scale-95 transition-all duration-200" asChild>
                   <Link href="/auth/login">
                     Already have an account?
                   </Link>

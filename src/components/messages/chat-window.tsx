@@ -61,16 +61,70 @@ export function ChatWindow({ conversationId, currentUserId }: ChatWindowProps) {
 
     const sendMessageMutation = useMutation({
         ...sendMessageMutationOptions,
-        onSuccess: () => {
-            setMessage("")
-            // Invalidate queries to refresh data
+        onMutate: async (newMessage) => {
+            // Cancel outgoing refetches
             const messagesQueryKey = trpc.messages.getMessages.queryKey({ conversationId })
             const conversationsQueryKey = trpc.messages.getConversations.queryKey()
-            queryClient.invalidateQueries({ queryKey: messagesQueryKey })
-            queryClient.invalidateQueries({ queryKey: conversationsQueryKey })
+
+            await queryClient.cancelQueries({ queryKey: messagesQueryKey })
+            await queryClient.cancelQueries({ queryKey: conversationsQueryKey })
+
+            // Snapshot previous values
+            const previousMessages = queryClient.getQueryData(messagesQueryKey)
+            const previousConversations = queryClient.getQueryData(conversationsQueryKey)
+
+            // Optimistically add new message
+            if (newMessage) {
+                const optimisticMessage = {
+                    id: `optimistic-${Date.now()}`,
+                    content: newMessage.content,
+                    senderId: currentUserId,
+                    createdAt: new Date().toISOString(),
+                    read: false,
+                    conversationId,
+                    type: newMessage.type || "TEXT",
+                }
+
+                queryClient.setQueryData(messagesQueryKey, (old: any[]) => {
+                    return [...(old || []), optimisticMessage]
+                })
+
+                // Optimistically update conversation list (last message)
+                queryClient.setQueryData(conversationsQueryKey, (old: any[]) => {
+                    if (!old) return old
+                    return old.map((conv) => {
+                        if (conv.id === conversationId) {
+                            return {
+                                ...conv,
+                                lastMessage: optimisticMessage,
+                                updatedAt: new Date().toISOString(),
+                            }
+                        }
+                        return conv
+                    })
+                })
+            }
+
+            setMessage("") // Clear input immediately
+
+            return { previousMessages, previousConversations, messagesQueryKey, conversationsQueryKey }
         },
-        onError: () => {
+        onError: (err, newMessage, context: any) => {
+            if (context?.previousMessages) {
+                queryClient.setQueryData(context.messagesQueryKey, context.previousMessages)
+            }
+            if (context?.previousConversations) {
+                queryClient.setQueryData(context.conversationsQueryKey, context.previousConversations)
+            }
             toast.error("Failed to send message")
+        },
+        onSettled: (data, error, variables, context: any) => {
+            if (context?.messagesQueryKey) {
+                queryClient.invalidateQueries({ queryKey: context.messagesQueryKey })
+            }
+            if (context?.conversationsQueryKey) {
+                queryClient.invalidateQueries({ queryKey: context.conversationsQueryKey })
+            }
         },
     })
 

@@ -7,6 +7,7 @@ import { useSession, signOut } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet"
 import { Button } from "../ui/button"
+import { UserAvatar } from "@/components/ui/user-avatar"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 
@@ -92,25 +93,26 @@ function MobileSidebarContent({ session, pathname }: { session: any; pathname: s
         <div className="absolute bottom-20 left-10 w-32 h-32 bg-blue-500/15 rounded-full blur-xl" />
       </div>
 
-      <div className="relative z-10 flex h-16 items-center border-b border-purple-500/30 px-6">
+      <div className="relative z-10 flex h-16 items-center border-b border-white/10 px-6 bg-white/5 backdrop-blur-md">
         <div className="flex items-center gap-2 font-semibold">
-          <ArrowLeftRight className="h-6 w-6 text-purple-400" />
-          <span className="text-lg text-white">SkillSwap</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg shadow-purple-500/20">
+            <ArrowLeftRight className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-lg text-white tracking-tight font-bold">SkillSwap</span>
         </div>
       </div>
 
       {session?.user && (
         <div className="relative z-10 px-6">
-          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-purple-500/20">
-            <Avatar className="border-2 border-purple-500/30">
-              <AvatarImage src={session.user.image || "/placeholder.svg"} />
-              <AvatarFallback className="bg-purple-600 text-white">
-                {session.user.name?.charAt(0) || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium text-white">{session.user.name}</p>
-              <p className="text-sm text-purple-200">{session.user.email}</p>
+          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors">
+            <UserAvatar
+              user={session.user}
+              className="border-2 border-purple-500/30 w-10 h-10"
+              fallbackClassName="bg-gradient-to-br from-purple-600 to-blue-600"
+            />
+            <div className="overflow-hidden">
+              <p className="font-medium text-white truncate">{session.user.name}</p>
+              <p className="text-xs text-purple-200/70 truncate">{session.user.email}</p>
             </div>
           </div>
         </div>
@@ -122,13 +124,13 @@ function MobileSidebarContent({ session, pathname }: { session: any; pathname: s
             key={item.name}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+              "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200",
               pathname === item.href
-                ? "bg-purple-600/30 text-white border border-purple-500/50"
-                : "text-purple-100 hover:text-white hover:bg-purple-600/20",
+                ? "bg-purple-600/20 text-white border border-purple-500/30 shadow-sm"
+                : "text-purple-100/70 hover:text-white hover:bg-white/5",
             )}
           >
-            <item.icon className="h-4 w-4" />
+            <item.icon className={cn("h-5 w-5", pathname === item.href ? "text-purple-400" : "text-purple-400/70")} />
             {item.name}
           </Link>
         ))}
@@ -137,7 +139,7 @@ function MobileSidebarContent({ session, pathname }: { session: any; pathname: s
       <div className="relative z-10 mt-auto p-4">
         <Button
           variant="ghost"
-          className="w-full justify-start gap-2 text-purple-100 hover:text-white hover:bg-red-600/20 border border-red-500/30"
+          className="w-full justify-start gap-2 text-purple-100/70 hover:text-white hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all"
           onClick={() => signOut()}
         >
           <LogOut className="h-4 w-4" />
@@ -151,50 +153,51 @@ function MobileSidebarContent({ session, pathname }: { session: any; pathname: s
 function DesktopSidebarContent({ session, pathname }: { session: any; pathname: string }) {
   return (
     <>
-      <div className="flex h-16 items-center border-b border-purple-500/30 px-4 lg:px-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <ArrowLeftRight className="h-6 w-6 text-purple-400" />
-          <span className="hidden lg:inline text-lg text-white">SkillSwap</span>
+      <div className="flex h-16 items-center border-b border-white/10 px-4 lg:px-6 bg-white/5 backdrop-blur-md">
+        <Link href="/" className="flex items-center gap-3 font-semibold group">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform duration-300">
+            <ArrowLeftRight className="h-5 w-5 text-white" />
+          </div>
+          <span className="hidden lg:inline text-lg text-white tracking-tight font-bold">SkillSwap</span>
         </Link>
       </div>
 
       {session?.user && (
-        <div className="p-4 border-b border-purple-500/30">
-          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-purple-500/20">
-            <Avatar className="border-2 border-purple-500/30">
-              <AvatarImage src={session.user.image || "/placeholder.svg"} />
-              <AvatarFallback className="bg-purple-600 text-white">
-                {session.user.name?.charAt(0) || "U"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden lg:block">
-              <p className="font-medium text-white">{session.user.name}</p>
-              <p className="text-sm text-purple-200">{session.user.email}</p>
+        <div className="p-4 border-b border-white/10">
+          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors group cursor-pointer">
+            <UserAvatar
+              user={session.user}
+              className="border-2 border-purple-500/30 w-10 h-10 group-hover:border-purple-500/50 transition-colors"
+              fallbackClassName="bg-gradient-to-br from-purple-600 to-blue-600"
+            />
+            <div className="hidden lg:block overflow-hidden">
+              <p className="font-medium text-white truncate text-sm">{session.user.name}</p>
+              <p className="text-xs text-purple-200/70 truncate">{session.user.email}</p>
             </div>
           </div>
         </div>
       )}
 
-      <nav className="flex-1 overflow-y-auto py-2">
-        <div className="flex flex-col gap-1 px-2">
+      <nav className="flex-1 overflow-y-auto py-4">
+        <div className="flex flex-col gap-1 px-3">
           {navItems.map((item) => (
             <Tooltip key={item.name}>
               <TooltipTrigger asChild>
                 <Link
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200",
                     "group lg:justify-start justify-center",
                     pathname === item.href
-                      ? "bg-purple-600/30 text-white border border-purple-500/50"
-                      : "text-purple-100 hover:text-white hover:bg-purple-600/20",
+                      ? "bg-purple-600/20 text-white border border-purple-500/30 shadow-sm"
+                      : "text-purple-100/70 hover:text-white hover:bg-white/5",
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="hidden lg:inline">{item.name}</span>
+                  <item.icon className={cn("h-5 w-5 transition-colors", pathname === item.href ? "text-purple-400" : "text-purple-400/70 group-hover:text-purple-400")} />
+                  <span className="hidden lg:inline font-medium">{item.name}</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right" className="lg:hidden bg-black/80 border-purple-500/30 text-white">
+              <TooltipContent side="right" className="lg:hidden bg-gray-900 border-white/10 text-white">
                 {item.name}
               </TooltipContent>
             </Tooltip>
@@ -202,20 +205,20 @@ function DesktopSidebarContent({ session, pathname }: { session: any; pathname: 
         </div>
       </nav>
 
-      <div className="p-4 border-t border-purple-500/30">
+      <div className="p-4 border-t border-white/10">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="lg:w-full lg:justify-start lg:gap-2 text-purple-100 hover:text-white hover:bg-red-600/20 border border-red-500/30"
+              className="lg:w-full lg:justify-start lg:gap-3 text-purple-100/70 hover:text-white hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all rounded-xl h-10"
               onClick={() => signOut()}
             >
               <LogOut className="h-5 w-5" />
-              <span className="hidden lg:inline">Sign Out</span>
+              <span className="hidden lg:inline font-medium">Sign Out</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right" className="lg:hidden bg-black/80 border-purple-500/30 text-white">
+          <TooltipContent side="right" className="lg:hidden bg-gray-900 border-white/10 text-white">
             Sign Out
           </TooltipContent>
         </Tooltip>

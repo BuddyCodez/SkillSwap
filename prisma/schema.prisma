@@ -93,6 +93,7 @@ model User {
   receivedRatings      Rating[]       @relation("RatingReceivers")
   conversations        Conversation[] @relation("ConversationParticipants")
   sentMessages         Message[]      @relation("MessageSender")
+  createdAnnouncements Announcement[] @relation("CreatedAnnouncements")
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
   sessions             Session[]
@@ -188,6 +189,20 @@ model Message {
   @@map("messages")
 }
 
+model Announcement {
+  id          String           @id @default(uuid())
+  title       String
+  message     String
+  type        AnnouncementType @default(INFO)
+  active      Boolean          @default(true)
+  createdById String
+  createdBy   User             @relation("CreatedAnnouncements", fields: [createdById], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("announcements")
+}
+
 enum Role {
   NORMAL
   ADMIN
@@ -204,4 +219,11 @@ enum RequestStatus {
 enum MessageType {
   TEXT
   IMAGE
+}
+
+enum AnnouncementType {
+  INFO
+  WARNING
+  UPDATE
+  MAINTENANCE
 }
